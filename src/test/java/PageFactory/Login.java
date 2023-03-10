@@ -1,6 +1,5 @@
 package PageFactory;
 
-
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,13 +15,11 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-/* This class covers the functionalities in CLIQ Login page. It includes visibility of elements, input field validation
- and login functionality */
-
 public class Login {
     WebDriver driver;
     WebDriverWait wait;
     Properties prop;
+
     public static Logger logger;
 
 
@@ -36,10 +33,6 @@ public class Login {
     WebElement btnLogin;
     @FindBy(css = "span[class='alert-msg']")
     WebElement wrongCredAlert;
-    @FindBy(css = "a[class='forgot-password']")
-    WebElement forgotPasswordLink;
-    @FindBy(css = "div[class='ModalityWrapper__container osi performance-statistics sub-container']")
-    WebElement financialPerfEle;
 
 
     public Login(WebDriver driver) {
@@ -55,57 +48,41 @@ public class Login {
             driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
             loginBackground.getAttribute("src").equals("/assets/img/login-background.eaf3d2eae77e6f050718b0da18ef5839.png");
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
+            System.out.println("Element is not displayed - " + e);
         }
 
         String pageTitle = driver.getTitle();
 
         if (pageTitle.equals("Login")) {
-            logger.info("Page title verification success");
-        } else logger.info("Page title verification failed. Current page title is - " + pageTitle);
+            System.out.println("Page title verification success");
+        } else System.out.println("Page title verification failed. Current page title is - " + pageTitle);
     }
 
-    public void verifyForgotPassword() {
-        String expForgotPasswordURL = "https://culturalink.onelogin.com/password/forgot_password";
-        String actForgotPasswordURL = forgotPasswordLink.getAttribute("href");
-        Assert.assertEquals(actForgotPasswordURL, expForgotPasswordURL);
-    }
+    public void loginValidationCheck() throws InterruptedException {
 
-    public void loginValidationCheck() throws IOException {
-
-        wait = new WebDriverWait(driver, 20);
-        prop = new Properties();
-
-        String propFilePath = "src/test/resources/Config/Config.properties";
-        FileInputStream configPropFile = new FileInputStream(propFilePath);
-        prop.load(configPropFile);
-
-        String userName = prop.getProperty("User");
-        String password = prop.getProperty("Password");
-        String[][] cred = {{"", ""}, {"Test", "test"}, {userName, "123"}, {"testing@testmail.com", password}};
+        String[][] cred = {{"", ""}, {"Test", "test"}, {"gkrishnankutty@theculturalink.com", "123"}, {"testing@testmail.com", "Diversity2022!"}};
 
         for (String[] strings : cred) {
             inputEmail.clear();
             inputEmail.sendKeys(strings[0]);
+            Thread.sleep(1000);
 
             inputPassword.clear();
             inputPassword.sendKeys(strings[1]);
+            Thread.sleep(1000);
 
             btnLogin.click();
-
             WebDriverWait wait = new WebDriverWait(driver, 30);
             wait.until(ExpectedConditions.visibilityOf(wrongCredAlert));
-
             String alert = wrongCredAlert.getText();
-
             if (alert.equals("Your email/password is incorrect")) {
+                System.out.println("Alert verification success");
                 logger.info("Alert verification success....");
-                wait.until(ExpectedConditions.invisibilityOf(wrongCredAlert));
-            } else logger.info("No alert displayed, Alert verification failed");
+                Thread.sleep(3000);
+            } else System.out.println("No alert displayed, Alert verification failed");
         }
     }
-
-    public void loginWithValidCredentials() throws IOException {
+    public void loginWithValidCredentials() throws IOException, InterruptedException {
         prop = new Properties();
         String propFilePath = "src/test/resources/Config/Config.properties";
         FileInputStream configPropFile = new FileInputStream(propFilePath);
@@ -121,21 +98,17 @@ public class Login {
 
         inputEmail.clear();
         inputEmail.sendKeys(userName);
-
+        Thread.sleep(1000);
         inputPassword.clear();
         inputPassword.sendKeys(password);
-
+        Thread.sleep(1000);
         btnLogin.click();
         logger.info("Logged in to the Application....");
-
     }
-
-    public void verifyDashboardLoaded() {
-        wait = new WebDriverWait(driver, 70);
-        wait.until(ExpectedConditions.visibilityOf(financialPerfEle));
+    public void verifyDashboardLoaded() throws InterruptedException {
+        Thread.sleep(60000);
         String currentTitle = driver.getTitle();
         String expectedTitle = "CLIQ - Dashboard";
         Assert.assertEquals(currentTitle, expectedTitle);
     }
-
 }

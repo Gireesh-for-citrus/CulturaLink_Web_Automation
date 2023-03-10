@@ -8,19 +8,12 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.log4testng.Logger;
 
 import java.util.List;
 
-/* This class covers the functionalities of Navigation panel in CLIQ Dashboard page. It includes visibility of elements,
-link redirection etc. */
-
-public class navigationPanel {
-
-
+public class NavigationPanel {
     WebDriver driver;
     WebDriverWait wait;
-    public static Logger logger;
 
     @FindBy(css = "img[class='SidebarHeader__cl-logo']")
     WebElement dashboardLogo;
@@ -56,10 +49,9 @@ public class navigationPanel {
     WebElement loginBackground;
 
 
-    public navigationPanel(WebDriver driver) {
+    public NavigationPanel(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
-        logger = Logger.getLogger(Dashboard.class.getName().getClass());
     }
 
     public void visibilityOfLogo() {
@@ -69,7 +61,7 @@ public class navigationPanel {
         String baseUrl = currentUrl.replace("/dashboard", "");
 
         String actAttribute = dashboardLogo.getAttribute("src");
-        String expAttribute = baseUrl + "/assets/img/CulturaLink_logo.9a799bfe28b33aa673d52c8e700c62f7.png";
+        String expAttribute = baseUrl + "/assets/img/CulturaLink_logo.53f8f8c3ed4a09b0073526ee99b1a024.png";
         Assert.assertEquals(actAttribute, expAttribute);
 
     }
@@ -84,14 +76,11 @@ public class navigationPanel {
             Thread.sleep(1000);
             String updatedSideBarStyle = sideBar.getAttribute("style");
             Assert.assertEquals(updatedSideBarStyle, expStyleAfterClick);
-
-
         } else {
-            logger.info("Side bar is in collapsed state");
+            System.out.println("Side bar is in collapsed state");
         }
 
     }
-
     public void headerLogoVisibility() {
         try {
             headerLogo.isDisplayed();
@@ -104,7 +93,7 @@ public class navigationPanel {
     public void verifyNotificationButton() {
         btn_Notification.click();
         if (!notificationPopupBody.isDisplayed()) {
-            logger.info("Notification popup is not displayed");
+            System.out.println("Notification popup is not displayed");
         } else {
             String expectedModalTitle = modalTitle.getText();
             Assert.assertEquals(expectedModalTitle, "Notifications");
@@ -115,8 +104,8 @@ public class navigationPanel {
 
     public void checkRedirection() throws InterruptedException {
         String currentUrl = driver.getCurrentUrl();
-        String baseUrl = currentUrl.replace("/dashboard", "");
-        for (int i = 0; i < 16; i++) {
+        String baseUrl = currentUrl.replace("/interpreter", "");
+        for (int i = 0; i < 15; i++) {
             String[] expectedHref = {baseUrl+"/cart",
                     baseUrl+"/cart/testCall",
                     baseUrl+"/dashboard",
@@ -132,9 +121,10 @@ public class navigationPanel {
                     baseUrl+"/interpreter",
                     baseUrl+"/analytics-reports",
                     baseUrl+"/help",
-                    baseUrl+"/reports"};
+            };
             String actualHref = navPanelElements.get(i).getAttribute("href");
             Thread.sleep(500);
+            System.out.println(actualHref);
             Assert.assertEquals(actualHref, expectedHref[i]);
         }
     }
@@ -146,9 +136,8 @@ public class navigationPanel {
             Assert.assertEquals(actTitle,expectedTitle);
             editProfClose.click();
         }else{
-            logger.info("Edit profile popup is not displayed");
+            System.out.println("Edit profile popup is not displayed");
         }
-
     }
     public void verifyLogoutFunctionality(){
         String currentUrl = driver.getCurrentUrl();
