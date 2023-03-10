@@ -3,17 +3,15 @@ package PageFactory;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -22,6 +20,7 @@ public class AddNewUser {
     WebDriver driver;
     WebDriverWait wait;
     JavascriptExecutor js;
+    Actions action;
 
     public AddNewUser(WebDriver driver) {
         this.driver = driver;
@@ -64,10 +63,12 @@ public class AddNewUser {
     WebElement permissionTable;
     @FindBy(how = How.CSS, using = "div.Select-option")
     List<WebElement> roleDropdownList;
-     @FindBy(xpath = "//th")
+    @FindBy(xpath = "//th")
     List<WebElement> permissionTableHeader;
     @FindBy(xpath = "//td")
     List<WebElement> permissionTableValues;
+    @FindBy(css = "span[class='checkbox no-pad']")
+    List<WebElement> permissionCheckbox;
 
 
     public void redirectToAddNewUserPage() {
@@ -106,20 +107,18 @@ public class AddNewUser {
 
     public void verifyExpandCollapseFunctionality() throws InterruptedException {
         wait = new WebDriverWait(driver, 20);
-        FluentWait FWait = new FluentWait(driver);
-        FWait.withTimeout(Duration.ofSeconds(30));
-        FWait.pollingEvery(Duration.ofSeconds(1));
+
         for (int i = 0; i < expandCollapseIcon.size(); i++) {
+            String currentExpCollapseIconStat = expandCollapseIcon.get(i).getAttribute("class");
             if (i < 2) {
-                String currentExpCollapseIconStat = expandCollapseIcon.get(i).getAttribute("class");
                 Assert.assertEquals(currentExpCollapseIconStat, "fa fa-angle-down");
 
                 String currentInputFieldContStat = inputFieldContainers.get(i).getAttribute("class");
                 Assert.assertEquals(currentInputFieldContStat, "collapse show");
 
                 expandCollapseIcon.get(i).click();
-                //wait.until(ExpectedConditions.attributeToBe(inputFieldContainers.get(i), "class", "collapse"));
-                Thread.sleep(2000);
+                //Explicit is not working in this cases, it is taking some time to change the class attribute to 'collapse' from 'collapse show'
+                Thread.sleep(1000);
 
                 String iconStatAfterClick = expandCollapseIcon.get(i).getAttribute("class");
                 Assert.assertEquals(iconStatAfterClick, "fa fa-angle-right");
@@ -127,11 +126,7 @@ public class AddNewUser {
                 String containerStatAfterClick = inputFieldContainers.get(i).getAttribute("class");
                 Assert.assertEquals(containerStatAfterClick, "collapse");
 
-                expandCollapseIcon.get(i).click();
-                Thread.sleep(2000);
-
             } else {
-                String currentExpCollapseIconStat = expandCollapseIcon.get(i).getAttribute("class");
                 Assert.assertEquals(currentExpCollapseIconStat, "fa fa-angle-right");
 
                 String currentInputFieldContStat = inputFieldContainers.get(i).getAttribute("class");
@@ -139,7 +134,7 @@ public class AddNewUser {
 
                 expandCollapseIcon.get(i).click();
                 //wait.until(ExpectedConditions.attributeContains(inputFieldContainers.get(i),"class","show"));
-                Thread.sleep(2000);
+                Thread.sleep(1000);
 
                 String iconStatAfterClick = expandCollapseIcon.get(i).getAttribute("class");
                 Assert.assertEquals(iconStatAfterClick, "fa fa-angle-down");
@@ -147,10 +142,9 @@ public class AddNewUser {
                 String containerStatAfterClick = inputFieldContainers.get(i).getAttribute("class");
                 Assert.assertEquals(containerStatAfterClick, "collapse show");
 
-                expandCollapseIcon.get(i).click();
-                Thread.sleep(1000);
-
             }
+            expandCollapseIcon.get(i).click();
+            Thread.sleep(1000);
         }
     }
 
@@ -215,11 +209,11 @@ public class AddNewUser {
 
     public void verifyMandatoryFieldsInContactInfo() {
         WebElement[] requiredFields = {inputFields.get(4), inputFields.get(12)};
-        for (int i = 0; i < requiredFields.length; i++) {
+        for (WebElement requiredField : requiredFields) {
 
             try {
                 js = (JavascriptExecutor) driver;
-                boolean isRequired = (Boolean) js.executeScript("return arguments[0].required;", requiredFields[i]);
+                boolean isRequired = (Boolean) js.executeScript("return arguments[0].required;", requiredField);
                 Assert.assertTrue(isRequired);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -254,9 +248,9 @@ public class AddNewUser {
 
     public void verifyMandatoryFieldsInHomeAddress() {
         WebElement[] requiredFields = {inputFields.get(13), inputFields.get(16), stateSelect.get(0), inputFields.get(17)};
-        for (int i = 0; i < requiredFields.length; i++) {
+        for (WebElement requiredField : requiredFields) {
             js = (JavascriptExecutor) driver;
-            boolean isRequired = (Boolean) js.executeScript("return arguments[0].required;", requiredFields[i]);
+            boolean isRequired = (Boolean) js.executeScript("return arguments[0].required;", requiredField);
             Assert.assertTrue(isRequired);
         }
     }
@@ -332,7 +326,7 @@ public class AddNewUser {
         Assert.assertTrue(visibleInputFields);
     }
 
-    public void verifyRoleSelectionDropdownInRolesSection() throws InterruptedException {
+    public void verifyRoleSelectionDropdownInRolesSection() {
         wait = new WebDriverWait(driver, 10);
         ClUserTitle.get(5).click();
         wait.until(ExpectedConditions.visibilityOf(selectRole));
@@ -377,6 +371,9 @@ public class AddNewUser {
         boolean permissionTableVisibility = permissionTable.isDisplayed();
         Assert.assertTrue(permissionTableVisibility);
 
+        boolean interpreterInfoSectionVisible = ClUserTitle.get(6).isDisplayed();
+        Assert.assertTrue(interpreterInfoSectionVisible);
+
 
     }
 
@@ -390,13 +387,25 @@ public class AddNewUser {
                 "Users", "VRI", "OPI", "DT", "OSI", "Demo", "Scheduling Admin", "Analytics", "Web Calls", "Import"};
 
         List<String> actPermissionNames = new ArrayList<>();
-        IntStream.range(0, 47 / 3 + 1).map(i -> i * 3).forEach((i) -> {
-            actPermissionNames.add(permissionTableValues.get(i).getText());
-        });
+        IntStream.range(0, 47 / 3 + 1).map(i -> i * 3).forEach((i) -> actPermissionNames.add(permissionTableValues.get(i).getText()));
 
         for (int j = 0; j < expPermissionNames.length; j++) {
             Assert.assertEquals(actPermissionNames.get(j), expPermissionNames[j]);
         }
+    }
+
+    public void verifyEnableAllPermissionForAdminUser() {
+        wait = new WebDriverWait(driver, 5);
+        action = new Actions(driver);
+        IntStream.range(0, 31 / 2 + 1).map(i -> i * 2).forEach((i) -> {
+            permissionCheckbox.get(i).click();
+
+            String permissionEnabledStatus = permissionCheckbox.get(i).getText();
+            String navigMenupermissionStatus = permissionCheckbox.get(i + 1).getText();
+
+            Assert.assertEquals(permissionEnabledStatus, "Enabled");
+            Assert.assertEquals(navigMenupermissionStatus, "Enabled");
+        });
     }
 }
 

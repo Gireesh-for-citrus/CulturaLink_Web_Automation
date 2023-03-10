@@ -43,10 +43,10 @@ public class CommonSteps {
         PropertyConfigurator.configure(log4Jpath);
     }
 
-    @After
-    public void closeBrowser() {
-        driver.close();
-    }
+//    @After
+//    public void closeBrowser() {
+//        driver.close();
+//    }
 
     @Given("I Load the URL {string}")
     public void iLoadTheUrl(String urlName) throws IOException {
@@ -675,5 +675,6 @@ adduser.verifyInputFieldFunctionalityInHomeAddress();
         adduser.verifyRoleSelectionDropdownInRolesSection();
         adduser.verifySelectAdminRoleFieldInRoles();
         adduser.verifyPermissionTableValuesAndCheckBoxes();
+        adduser.verifyEnableAllPermissionForAdminUser();
     }
 }
